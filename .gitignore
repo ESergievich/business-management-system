@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.pyc
+*.py[cod]
+*.pyo
+*.pyd
+*.db
+
+# venv
+.venv/
+
+# Environment
+.env
+.env.*
+
+# IDE
+.vscode/
+.idea/
+
+# Docker
+*.log
+*.pid
+*.sock
+
+# Build artifacts
+dist/
+build/
+
+# Cache
+.cache/
+uv.lock

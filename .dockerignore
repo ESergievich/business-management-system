@@ -1,0 +1,21 @@
+# Git
+.git
+.gitignore
+
+# Virtual envs
+.venv
+__pycache__
+*.pyc
+
+# Editor
+.idea
+
+# Tests / docs / cache
+tests
+docs
+*.log
+*.md
+
+# Local configs
+.env
+.env.*
