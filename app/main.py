@@ -1,6 +1,9 @@
+from api import router as api_router
 from fastapi import FastAPI
 
 app = FastAPI(title="Business management system API")
+
+app.include_router(api_router)
 
 
 @app.get("/")
