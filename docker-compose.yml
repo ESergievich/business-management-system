@@ -1,8 +1,43 @@
 services:
   web:
     build: .
-    container_name: management-api
+    container_name: management_api
+    restart: unless-stopped
+    env_file: ".env"
+    depends_on:
+      management_api_postgres:
+        condition: service_healthy
     ports:
       - "8000:8000"
     volumes:
       - ./app:/app
+
+  management_api_postgres:
+    image: postgres:17
+    restart: unless-stopped
+    container_name: management_api_postgres
+    env_file: ".env"
+    environment:
+      POSTGRES_USER: ${APP_CONFIG__DB__USER?Variable not set}
+      POSTGRES_PASSWORD: ${APP_CONFIG__DB__PASSWORD?Variable not set}
+      POSTGRES_DB: ${APP_CONFIG__DB__NAME?Variable not set}
+    volumes:
+      - management_api_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${APP_CONFIG__DB__USER} -d ${APP_CONFIG__DB__NAME}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  adminer:
+    image: adminer
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: management_api_postgres
+      ADMINER_DESIGN: nette
+
+volumes:
+  management_api_data:

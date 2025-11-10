@@ -28,6 +28,7 @@ USER app
 WORKDIR /app
 
 ENV PATH="/opt/application/.venv/bin:$PATH"
+ENV PYTHONPATH="/"
 
 EXPOSE 8000
 
