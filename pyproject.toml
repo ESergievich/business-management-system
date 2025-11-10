@@ -36,6 +36,7 @@ ignore = [
     "D413",
     "PLR0913",
     "S104",
+    "D101"
 ]
 
 [tool.mypy]
