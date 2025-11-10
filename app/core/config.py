@@ -24,9 +24,11 @@ class ApiV1Prefix(BaseModel):
 
     Attributes:
         prefix (str): The API v1 prefix.
+        auth (str): The authentication endpoint.
     """
 
     prefix: str = "/v1"
+    auth: str = "/auth"
 
 
 class ApiPrefix(BaseModel):
@@ -36,10 +38,30 @@ class ApiPrefix(BaseModel):
     Attributes:
         prefix (str): The API prefix.
         v1 (ApiV1Prefix): Configuration settings for the API v1 prefix.
+
+    Properties:
+        bearer_token_url (str):
+            Returns the full relative URL path for the authentication endpoint
+            used to obtain a Bearer token (e.g., "api/v1/auth/login").
+            The leading slash is automatically removed for compatibility
+            with FastAPI's OAuth2 configuration.
     """
 
     prefix: str = "/api"
     v1: ApiV1Prefix = ApiV1Prefix()
+
+    @property
+    def bearer_token_url(self) -> str:
+        """
+        Build and return the full relative URL for the Bearer token endpoint.
+
+        Returns:
+            str: The authentication URL path without a leading slash.
+                 Example: "api/v1/auth/login".
+        """
+        parts = (self.prefix, self.v1.prefix, self.v1.auth, "/login")
+        path = "".join(parts)
+        return path.removeprefix("/")
 
 
 class DatabaseConfig(BaseModel):
