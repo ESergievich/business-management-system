@@ -1,6 +1,10 @@
+from pathlib import Path
+
 from pydantic import BaseModel, Field, PostgresDsn, field_validator
 from pydantic_core.core_schema import ValidationInfo
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+BASE_DIR = Path(__file__)
 
 
 class RunConfig(BaseModel):
@@ -184,7 +188,10 @@ class Settings(BaseSettings):
     access_token: AccessToken
 
     model_config = SettingsConfigDict(
-        env_file=("../.env.template", "../.env"),
+        env_file=(
+            f"{BASE_DIR.resolve().parent.parent.parent}/.env.template",
+            f"{BASE_DIR.resolve().parent.parent.parent}/.env",
+        ),
         env_prefix="APP_CONFIG__",
         env_nested_delimiter="__",
     )
