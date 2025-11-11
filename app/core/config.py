@@ -148,6 +148,18 @@ class DatabaseConfig(BaseModel):
         )
 
 
+class AccessToken(BaseModel):
+    """
+    Configuration settings for access tokens.
+
+    Attributes:
+        lifetime_seconds (int): Lifetime of the access token in seconds.
+            Default is 3600 seconds (1 hour).
+    """
+
+    lifetime_seconds: int = 3600
+
+
 class Settings(BaseSettings):
     """
     Application settings container.
@@ -163,6 +175,7 @@ class Settings(BaseSettings):
     run: RunConfig = RunConfig()
     api: ApiPrefix = ApiPrefix()
     db: DatabaseConfig = DatabaseConfig()
+    access_token: AccessToken = AccessToken()
 
     model_config = SettingsConfigDict(
         env_file=("../.env.template", "../.env"),
