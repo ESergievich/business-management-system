@@ -25,10 +25,12 @@ class ApiV1Prefix(BaseModel):
     Attributes:
         prefix (str): The API v1 prefix.
         auth (str): The authentication endpoint.
+        users (str): The users endpoint.
     """
 
     prefix: str = "/v1"
     auth: str = "/auth"
+    users: str = "/users"
 
 
 class ApiPrefix(BaseModel):
