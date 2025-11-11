@@ -1,4 +1,3 @@
-from fastapi_users.authentication.strategy import AccessTokenProtocol
 from fastapi_users_db_sqlalchemy.access_token import SQLAlchemyBaseAccessTokenTable
 from sqlalchemy import ForeignKey, Integer
 from sqlalchemy.orm import Mapped, mapped_column
@@ -6,7 +5,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from app.models.base import Base
 
 
-class AccessToken(Base, SQLAlchemyBaseAccessTokenTable[int], AccessTokenProtocol[int]):
+class AccessToken(Base, SQLAlchemyBaseAccessTokenTable[int]):
     """Access token model."""
 
     id = None  # type: ignore[assignment]

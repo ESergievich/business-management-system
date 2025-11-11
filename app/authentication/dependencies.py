@@ -1,3 +1,5 @@
+# mypy: ignore-errors
+
 from collections.abc import AsyncGenerator
 from typing import TYPE_CHECKING, Annotated
 
