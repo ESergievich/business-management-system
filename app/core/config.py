@@ -155,9 +155,13 @@ class AccessToken(BaseModel):
     Attributes:
         lifetime_seconds (int): Lifetime of the access token in seconds.
             Default is 3600 seconds (1 hour).
+        reset_password_token_secret (str | None): Secret key for reset password tokens.
+        verification_token_secret (str | None): Secret key for verification tokens.
     """
 
     lifetime_seconds: int = 3600
+    reset_password_token_secret: str
+    verification_token_secret: str
 
 
 class Settings(BaseSettings):
@@ -175,7 +179,7 @@ class Settings(BaseSettings):
     run: RunConfig = RunConfig()
     api: ApiPrefix = ApiPrefix()
     db: DatabaseConfig = DatabaseConfig()
-    access_token: AccessToken = AccessToken()
+    access_token: AccessToken
 
     model_config = SettingsConfigDict(
         env_file=("../.env.template", "../.env"),
@@ -184,4 +188,4 @@ class Settings(BaseSettings):
     )
 
 
-settings = Settings()
+settings = Settings()  # type: ignore[call-arg]
