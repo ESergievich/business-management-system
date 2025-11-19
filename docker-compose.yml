@@ -3,6 +3,8 @@ services:
     build: .
     container_name: management_api
     restart: unless-stopped
+    command: sh -c "alembic -c /alembic.ini upgrade head &&
+                    uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
     env_file: ".env"
     depends_on:
       management_api_postgres:
@@ -11,6 +13,8 @@ services:
       - "8000:8000"
     volumes:
       - ./app:/app
+      - ./migrations:/migrations
+      - ./alembic.ini:/alembic.ini
 
   management_api_postgres:
     image: postgres:17
