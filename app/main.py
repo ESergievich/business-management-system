@@ -1,9 +1,9 @@
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
-from api import router as api_router
 from fastapi import FastAPI
 
+from app.api import router as api_router
 from app.core.db_helper import db_helper
 
 
