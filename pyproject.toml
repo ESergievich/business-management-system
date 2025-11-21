@@ -53,3 +53,4 @@ disallow_untyped_defs = true
 ignore_missing_imports = true
 strict_optional = true
 show_error_codes = true
+plugins = "sqlalchemy.ext.mypy.plugin"
