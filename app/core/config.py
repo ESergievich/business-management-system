@@ -30,11 +30,13 @@ class ApiV1Prefix(BaseModel):
         prefix (str): The API v1 prefix.
         auth (str): The authentication endpoint.
         users (str): The users endpoint.
+        teams (str): The teams endpoint.
     """
 
     prefix: str = "/v1"
     auth: str = "/auth"
     users: str = "/users"
+    teams: str = "/teams"
 
 
 class ApiPrefix(BaseModel):
