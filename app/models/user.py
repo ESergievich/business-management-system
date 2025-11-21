@@ -1,11 +1,16 @@
 from enum import Enum
+from typing import TYPE_CHECKING
 
 from fastapi_users_db_sqlalchemy import SQLAlchemyBaseUserTable
 from sqlalchemy import Enum as SQLA_Enum
 from sqlalchemy import String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.models.association import user_team
 from app.models.base import Base
+
+if TYPE_CHECKING:
+    from app.models.team import Team
 
 
 class UserRole(str, Enum):
@@ -33,6 +38,7 @@ class User(Base, SQLAlchemyBaseUserTable[int]):
     Attributes:
         username (str): Unique username of the user.
         role (UserRole): Role of the user, default is `USER`.
+        teams (list[Team]): List of teams the user belongs to.
     """
 
     username: Mapped[str] = mapped_column(String, nullable=False)
@@ -41,3 +47,5 @@ class User(Base, SQLAlchemyBaseUserTable[int]):
         default=UserRole.USER,
         nullable=False,
     )
+
+    teams: Mapped[list["Team"]] = relationship("Team", secondary=user_team, back_populates="members")
