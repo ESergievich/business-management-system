@@ -23,14 +23,13 @@ from app.models.team import Team
 from app.models.user import UserRole
 from app.schemas.team import TeamCreate, TeamJoin, TeamRead
 
-router = APIRouter(
-    prefix=settings.api.v1.teams,
-    tags=["Teams"],
-)
+router = APIRouter(prefix=settings.api.v1.teams, tags=["Teams"])
 
 
 @router.post(
     "",
+    response_model=TeamRead,
+    response_model_exclude_none=True,
     status_code=status.HTTP_201_CREATED,
     summary="Create a new team",
     description="Allows an admin to create a new team with a unique invite code.",
@@ -39,21 +38,7 @@ async def create_team(
     team_data: TeamCreate,
     _current_user: Annotated[User, Depends(role_required(UserRole.ADMIN))],
     session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
-) -> TeamRead:
-    """
-    Create a new team.
-
-    Args:
-        team_data (TeamCreate): Data for the new team.
-        _current_user (User): Current user with admin role.
-        session (AsyncSession): Database session.
-
-    Raises:
-        ObjectExistsException: If a team with the same name already exists.
-
-    Returns:
-        TeamRead: The newly created team with invite code.
-    """
+) -> Team:
     result = await session.execute(select(Team).where(Team.name == team_data.name))
     existing_team = result.scalar_one_or_none()
 
@@ -71,12 +56,13 @@ async def create_team(
     session.add(new_team)
     await session.commit()
     await session.refresh(new_team)
-
-    return TeamRead.model_validate(new_team)
+    return new_team
 
 
 @router.post(
     "/join",
+    response_model=TeamRead,
+    response_model_exclude_none=True,
     summary="Join a team",
     description="Allows the current user to join a team using an invite code.",
 )
@@ -84,22 +70,7 @@ async def join_team(
     join_data: TeamJoin,
     current_user: Annotated[User, Depends(current_active_user)],
     session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
-) -> TeamRead:
-    """
-    Join a team by invite code.
-
-    Args:
-        join_data (TeamJoin): Data containing the invite code.
-        current_user (User): Current authenticated user.
-        session (AsyncSession): Database session.
-
-    Raises:
-        AlreadyInTeamException: If the user is already in another team.
-        ObjectNotFoundException: If the team with the given invite code does not exist.
-
-    Returns:
-        TeamRead: The team the user joined.
-    """
+) -> Team:
     if current_user.teams:
         raise AlreadyInTeamError
 
@@ -117,8 +88,7 @@ async def join_team(
 
     await session.commit()
     await session.refresh(team)
-
-    return TeamRead.model_validate(team)
+    return team
 
 
 @router.delete(
@@ -153,12 +123,12 @@ async def leave_team(
 
     team.members.remove(current_user)
     session.add(team)
-
     await session.commit()
 
 
 @router.get(
     "/{team_id}/members",
+    response_model=TeamRead,
     summary="Get team members",
     description="Allows an admin or manager to view the members of a team.",
 )
@@ -166,21 +136,7 @@ async def get_team_members(
     team_id: int,
     _current_user: Annotated[User, Depends(role_required(UserRole.ADMIN, UserRole.MANAGER))],
     session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
-) -> TeamRead:
-    """
-    Get a list of members in a team.
-
-    Args:
-        team_id (int): ID of the team.
-        _current_user (User): Current user with admin or manager role.
-        session (AsyncSession): Database session.
-
-    Raises:
-        ObjectNotFoundException: If the team does not exist.
-
-    Returns:
-        TeamRead: The team object including its members.
-    """
+) -> Team:
     result = await session.execute(select(Team).where(Team.id == team_id).options(selectinload(Team.members)))
     team = result.scalar_one_or_none()
 
@@ -188,36 +144,21 @@ async def get_team_members(
         msg = "Team"
         raise ObjectNotFoundError(msg)
 
-    return TeamRead.model_validate(team)
+    return team
 
 
 @router.post(
     "/{team_id}/members/{user_id}",
+    response_model=TeamRead,
     summary="Add a user to a team",
-    description=("Allows an admin to add any user to a team. A manager can add users only to their own team."),
+    description="Allows an admin to add any user to a team. A manager can add users only to their own team.",
 )
 async def add_team_member(
     team_id: int,
     user_id: int,
     current_user: Annotated[User, Depends(role_required(UserRole.ADMIN, UserRole.MANAGER))],
     session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
-) -> TeamRead:
-    """
-    Add a user to a team.
-
-    Args:
-        team_id (int): ID of the team.
-        user_id (int): ID of the user to add.
-        current_user (User): Current user with ADMIN or MANAGER role.
-        session (AsyncSession): Database session.
-
-    Raises:
-        ObjectNotFoundException: If the team or user does not exist.
-        ForbiddenAccess: If a manager tries to add a user to another team.
-
-    Returns:
-        TeamRead: The updated team including its members.
-    """
+) -> Team:
     result = await session.execute(
         select(Team).where(Team.id == team_id).options(selectinload(Team.members)),
     )
@@ -243,12 +184,12 @@ async def add_team_member(
     session.add(team)
     await session.commit()
     await session.refresh(team)
-
-    return TeamRead.model_validate(team)
+    return team
 
 
 @router.delete(
     "/{team_id}/members/{user_id}",
+    response_model=TeamRead,
     summary="Remove a user from a team",
     description=(
         "Allows an admin to remove any user from a team. A manager can remove users only from their own team."
@@ -259,24 +200,7 @@ async def remove_team_member(
     user_id: int,
     current_user: Annotated[User, Depends(role_required(UserRole.ADMIN, UserRole.MANAGER))],
     session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
-) -> TeamRead:
-    """
-    Remove a user from a team.
-
-    Args:
-        team_id (int): ID of the team.
-        user_id (int): ID of the user to remove.
-        current_user (User): Current user with ADMIN or MANAGER role.
-        session (AsyncSession): Database session.
-
-    Raises:
-        ObjectNotFoundException: If the team or user does not exist.
-        NotInTeamException: If the user is not in the team.
-        ForbiddenAccess: If a manager tries to remove a user from another team.
-
-    Returns:
-        TeamRead: The updated team including remaining members.
-    """
+) -> Team:
     result = await session.execute(
         select(Team).where(Team.id == team_id).options(selectinload(Team.members)),
     )
@@ -302,5 +226,4 @@ async def remove_team_member(
     session.add(team)
     await session.commit()
     await session.refresh(team)
-
-    return TeamRead.model_validate(team)
+    return team

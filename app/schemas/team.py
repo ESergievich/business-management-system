@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, field_validator
 
 from app.schemas.user import UserRead
 
@@ -21,7 +21,7 @@ class TeamCreate(TeamBase):
 class TeamRead(TeamBase):
     id: int
     invite_code: str | None = None
-    members: list[UserRead] = Field(default_factory=list)
+    members: list[UserRead] | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
