@@ -31,12 +31,24 @@ class ApiV1Prefix(BaseModel):
         auth (str): The authentication endpoint.
         users (str): The users endpoint.
         teams (str): The teams endpoint.
+        tasks (str): The tasks endpoint.
+        evaluations (str): The evaluations endpoint.
+
+    Properties:
+        comments (str): The comments endpoint.
     """
 
     prefix: str = "/v1"
     auth: str = "/auth"
     users: str = "/users"
     teams: str = "/teams"
+    tasks: str = "/tasks"
+    evaluations: str = "/evaluations"
+
+    @property
+    def comments(self) -> str:
+        """Get the comment`s endpoint."""
+        return f"{self.tasks}/{{task_id}}/comments"
 
 
 class ApiPrefix(BaseModel):
