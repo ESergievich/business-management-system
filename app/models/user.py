@@ -10,6 +10,8 @@ from app.models.association import user_team
 from app.models.base import Base
 
 if TYPE_CHECKING:
+    from app.models.comment import Comment
+    from app.models.task import Task
     from app.models.team import Team
 
 
@@ -49,3 +51,24 @@ class User(Base, SQLAlchemyBaseUserTable[int]):
     )
 
     teams: Mapped[list["Team"]] = relationship("Team", secondary=user_team, back_populates="members")
+
+    created_tasks: Mapped[list["Task"]] = relationship(
+        "Task",
+        foreign_keys="Task.creator_id",
+        back_populates="creator",
+        cascade="all",
+    )
+
+    assigned_tasks: Mapped[list["Task"]] = relationship(
+        "Task",
+        foreign_keys="Task.assignee_id",
+        back_populates="assignee",
+        cascade="all",
+    )
+
+    # Comments by this user (SET NULL on delete)
+    comments: Mapped[list["Comment"]] = relationship(
+        "Comment",
+        back_populates="author",
+        cascade="all",
+    )
