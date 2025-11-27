@@ -22,14 +22,14 @@ class TaskStatus(str, Enum):
 
 class Task(Base):
     title: Mapped[str] = mapped_column(String(255), nullable=False)
-    description: Mapped[str] = mapped_column(Text, nullable=True)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
     status: Mapped[TaskStatus] = mapped_column(
         SQLEnum(TaskStatus),
         default=TaskStatus.OPEN,
         nullable=False,
         index=True,
     )
-    deadline: Mapped[datetime] = mapped_column(DateTime, nullable=True)
+    deadline: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
     team_id: Mapped[int] = mapped_column(ForeignKey("teams.id", ondelete="CASCADE"), nullable=False)
     team: Mapped["Team"] = relationship("Team", back_populates="tasks")
