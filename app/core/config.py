@@ -45,6 +45,7 @@ class ApiV1Prefix(BaseModel):
     tasks: str = "/tasks"
     evaluations: str = "/evaluations"
     meetings: str = "/meetings"
+    calendar: str = "/calendar"
 
     @property
     def comments(self) -> str:

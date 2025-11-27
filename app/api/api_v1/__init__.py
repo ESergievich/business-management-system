@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
 from app.api.api_v1.auth import router as auth_router
+from app.api.api_v1.calendar import router as calendar_router
 from app.api.api_v1.comments import router as comments_router
 from app.api.api_v1.evaluations import router as evaluations_router
 from app.api.api_v1.meetings import router as meetings_router
