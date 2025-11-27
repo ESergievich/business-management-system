@@ -87,3 +87,19 @@ class InvalidAssigneeError(APIError):
     status_code: int = status.HTTP_400_BAD_REQUEST
     error_code: str = "invalid_assignee"
     message: str = "Assignee must be from the task's team"
+
+
+class MeetingTimeConflictError(APIError):
+    """Raised when meeting time conflicts with another meeting."""
+
+    status_code: int = status.HTTP_409_CONFLICT
+    error_code: str = "meeting_time_conflict"
+    message: str = "Meeting time conflicts with existing meeting"
+
+
+class InvalidMeetingParticipantError(APIError):
+    """Raised when participant is not from the same team."""
+
+    status_code: int = status.HTTP_400_BAD_REQUEST
+    error_code: str = "invalid_meeting_participant"
+    message: str = "All participants must be from the meeting's team"
