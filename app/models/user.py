@@ -6,11 +6,12 @@ from sqlalchemy import Enum as SQLA_Enum
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.models.association import user_team
+from app.models.association import meeting_participants, user_team
 from app.models.base import Base
 
 if TYPE_CHECKING:
     from app.models.comment import Comment
+    from app.models.meeting import Meeting
     from app.models.task import Task
     from app.models.team import Team
 
@@ -66,9 +67,21 @@ class User(Base, SQLAlchemyBaseUserTable[int]):
         cascade="all",
     )
 
-    # Comments by this user (SET NULL on delete)
     comments: Mapped[list["Comment"]] = relationship(
         "Comment",
         back_populates="author",
         cascade="all",
+    )
+
+    organized_meetings: Mapped[list["Meeting"]] = relationship(
+        "Meeting",
+        foreign_keys="Meeting.organizer_id",
+        back_populates="organizer",
+        cascade="all",
+    )
+
+    participating_meetings: Mapped[list["Meeting"]] = relationship(
+        "Meeting",
+        secondary=meeting_participants,
+        back_populates="participants",
     )

@@ -7,6 +7,7 @@ from app.models import Base
 from app.models.association import user_team
 
 if TYPE_CHECKING:
+    from app.models.meeting import Meeting
     from app.models.user import User
 
 
@@ -24,3 +25,9 @@ class Team(Base):
     invite_code: Mapped[str] = mapped_column(String(50), unique=True, nullable=False, index=True)
 
     members: Mapped[list["User"]] = relationship("User", secondary=user_team, back_populates="teams")
+
+    meetings: Mapped[list["Meeting"]] = relationship(
+        "Meeting",
+        back_populates="team",
+        cascade="all, delete-orphan",
+    )
