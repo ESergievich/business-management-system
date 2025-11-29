@@ -4,6 +4,8 @@ from typing import Self
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from pydantic_core.core_schema import FieldValidationInfo
 
+from app.schemas.user import UserRead
+
 
 class MeetingBase(BaseModel):
     title: str
@@ -48,6 +50,7 @@ class MeetingRead(MeetingBase):
     id: int
     team_id: int
     organizer_id: int | None = None
+    participants: list[UserRead] = Field(default_factory=list, repr=False)
     participant_ids: list[int] = []
     created_at: datetime
     updated_at: datetime

@@ -18,6 +18,13 @@ class TeamCreate(TeamBase):
         return v.strip()
 
 
+class TeamCreateRead(TeamBase):
+    id: int
+    invite_code: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class TeamRead(TeamBase):
     id: int
     invite_code: str | None = None

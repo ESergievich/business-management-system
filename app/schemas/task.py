@@ -28,7 +28,7 @@ class TaskUpdate(BaseModel):
 class TaskRead(TaskBase):
     id: int
     team_id: int
-    creator_id: int
+    creator_id: int | None = None
     assignee_id: int | None = None
 
     model_config = ConfigDict(from_attributes=True)
