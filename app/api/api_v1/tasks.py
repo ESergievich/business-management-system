@@ -14,6 +14,7 @@ from app.core.permissions import can_access
 from app.dependencies.role_dependencies import role_required
 from app.errors.exceptions import ForbiddenAccessError, InvalidAssigneeError, ObjectNotFoundError
 from app.models import Task, Team, User
+from app.models.association import user_team
 from app.models.user import UserRole
 from app.schemas.task import TaskCreate, TaskRead, TaskUpdate
 
@@ -170,7 +171,9 @@ async def list_tasks(
         result = await session.execute(select(Task))
         return result.scalars().all()
 
-    member_team_ids = {team.id for team in current_user.teams}
-    result = await session.execute(select(Task).where(Task.team_id.in_(member_team_ids)))
+    stmt = (
+        select(Task).join(user_team, user_team.c.team_id == Task.team_id).where(user_team.c.user_id == current_user.id)
+    )
 
+    result = await session.execute(stmt)
     return result.scalars().all()
