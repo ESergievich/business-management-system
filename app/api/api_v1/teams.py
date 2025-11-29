@@ -178,9 +178,7 @@ async def add_team_member(
         raise AlreadyInTeamError
 
     team.members.append(user)
-    session.add(team)
     await session.commit()
-    await session.refresh(team)
     return team
 
 
@@ -220,7 +218,5 @@ async def remove_team_member(
         raise NotInTeamError
 
     team.members.remove(user)  # type: ignore[arg-type]
-    session.add(team)
     await session.commit()
-    await session.refresh(team)
     return team
