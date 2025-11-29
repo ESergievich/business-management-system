@@ -102,8 +102,6 @@ class MeetingService:
 
         self.session.add(meeting)
         await self.session.commit()
-        await self.session.refresh(meeting)
-
         return meeting
 
     async def get_meeting(self, meeting_id: int, user_id: int) -> Meeting:
