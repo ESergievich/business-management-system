@@ -112,7 +112,7 @@ async def leave_team(
         NotInTeamException: If the user is not part of the specified team.
     """
     result = await session.execute(
-        select(Team).where(Team.id == team_id),
+        select(Team).where(Team.id == team_id).options(selectinload(Team.members)),
     )
     team = result.scalar_one_or_none()
 
@@ -120,7 +120,6 @@ async def leave_team(
         raise NotInTeamError
 
     team.members.remove(current_user)
-    session.add(team)
     await session.commit()
 
 
