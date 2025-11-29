@@ -5,20 +5,22 @@ from fastapi import FastAPI
 
 from app.api import router as api_router
 from app.core.db_helper import db_helper
+from app.errors.exception_handlers import register_exception_handlers
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:  # noqa: ARG001
-    yield
-    await db_helper.dispose()
+def create_app() -> FastAPI:
+    @asynccontextmanager
+    async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:  # noqa: ARG001
+        yield
+        await db_helper.dispose()
 
+    app = FastAPI(title="Business management system API", lifespan=lifespan)
 
-app = FastAPI(title="Business management system API", lifespan=lifespan)
+    register_exception_handlers(app)
+    app.include_router(api_router)
 
-app.include_router(api_router)
+    @app.get("/")
+    def read_root() -> dict[str, str]:
+        return {"message": "Hello from business management system!"}
 
-
-@app.get("/")
-def read_root() -> dict[str, str]:
-    """Root endpoint."""
-    return {"message": "Hello from business management system!"}
+    return app
