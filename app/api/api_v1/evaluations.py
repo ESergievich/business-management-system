@@ -17,6 +17,7 @@ from app.errors.exceptions import (
     ObjectNotFoundError,
     TaskNotCompletedError,
 )
+from app.models import Team
 from app.models.evaluation import Evaluation
 from app.models.task import Task, TaskStatus
 from app.models.user import User, UserRole
@@ -52,7 +53,7 @@ async def create_evaluation(
     result = await session.execute(
         select(Task)
         .where(Task.id == task_id)
-        .options(joinedload(Task.team).selectinload(Task.team.members), joinedload(Task.evaluation)),
+        .options(joinedload(Task.team).selectinload(Team.members), joinedload(Task.evaluation)),
     )
     task = result.scalar_one_or_none()
     if not task:
