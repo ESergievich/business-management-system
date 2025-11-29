@@ -21,14 +21,14 @@ from app.errors.exceptions import (
 from app.models import User
 from app.models.team import Team
 from app.models.user import UserRole
-from app.schemas.team import TeamCreate, TeamJoin, TeamRead
+from app.schemas.team import TeamCreate, TeamCreateRead, TeamJoin, TeamRead
 
 router = APIRouter(prefix=settings.api.v1.teams, tags=["Teams"])
 
 
 @router.post(
     "",
-    response_model=TeamRead,
+    response_model=TeamCreateRead,
     response_model_exclude_none=True,
     status_code=status.HTTP_201_CREATED,
     summary="Create a new team",
