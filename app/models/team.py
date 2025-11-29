@@ -8,6 +8,7 @@ from app.models.association import user_team
 
 if TYPE_CHECKING:
     from app.models.meeting import Meeting
+    from app.models.task import Task
     from app.models.user import User
 
 
@@ -28,6 +29,12 @@ class Team(Base):
 
     meetings: Mapped[list["Meeting"]] = relationship(
         "Meeting",
+        back_populates="team",
+        cascade="all, delete-orphan",
+    )
+
+    tasks: Mapped[list["Task"]] = relationship(
+        "Task",
         back_populates="team",
         cascade="all, delete-orphan",
     )
