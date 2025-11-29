@@ -63,6 +63,7 @@ async def create_team(
     "/join",
     response_model=TeamRead,
     response_model_exclude_none=True,
+    status_code=status.HTTP_200_OK,
     summary="Join a team",
     description="Allows the current user to join a team using an invite code.",
 )
@@ -71,11 +72,8 @@ async def join_team(
     current_user: Annotated[User, Depends(current_active_user)],
     session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
 ) -> Team:
-    if current_user.teams:
-        raise AlreadyInTeamError
-
     result = await session.execute(
-        select(Team).where(Team.invite_code == join_data.invite_code),
+        select(Team).where(Team.invite_code == join_data.invite_code).options(selectinload(Team.members)),
     )
     team = result.scalar_one_or_none()
 
@@ -83,11 +81,11 @@ async def join_team(
         msg = "Team"
         raise ObjectNotFoundError(msg)
 
-    team.members.append(current_user)
-    session.add(team)
+    if current_user in team.members:
+        raise AlreadyInTeamError
 
+    team.members.append(current_user)
     await session.commit()
-    await session.refresh(team)
     return team
 
 
