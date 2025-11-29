@@ -144,7 +144,7 @@ async def delete_task(
     task = await get_task_with_team(task_id, session)
 
     member_ids = {member.id for member in task.team.members}
-    if not can_access(current_user, member_ids, current_user.id):
+    if not can_access(current_user, member_ids):
         raise ForbiddenAccessError
 
     await session.delete(task)
