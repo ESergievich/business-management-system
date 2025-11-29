@@ -32,7 +32,7 @@ class ForbiddenAccessError(APIError):
 class ObjectExistsError(APIError):
     """Raised when attempting to create an object that already exists."""
 
-    status_code: int = status.HTTP_400_BAD_REQUEST
+    status_code: int = status.HTTP_409_CONFLICT
     error_code: str = "object_exists"
 
     def __init__(self, object_name: str, message: str | None = None) -> None:
