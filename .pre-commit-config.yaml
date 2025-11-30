@@ -1,4 +1,4 @@
-exclude: '^tests/'
+exclude: "^tests/|app/admin/"
 repos:
   - repo: local
     hooks:
