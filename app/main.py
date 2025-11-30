@@ -2,8 +2,11 @@ from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from starlette.middleware.sessions import SessionMiddleware
 
+from app.admin.admin import setup_admin
 from app.api import router as api_router
+from app.core.config import settings
 from app.core.db_helper import db_helper
 from app.errors.exception_handlers import register_exception_handlers
 
@@ -16,6 +19,12 @@ def create_app() -> FastAPI:
 
     app = FastAPI(title="Business management system API", lifespan=lifespan)
 
+    app.add_middleware(
+        SessionMiddleware,
+        secret_key=settings.access_token.verification_token_secret,
+    )
+
+    setup_admin(app, db_helper.engine)
     register_exception_handlers(app)
     app.include_router(api_router)
 
@@ -24,3 +33,6 @@ def create_app() -> FastAPI:
         return {"message": "Hello from business management system!"}
 
     return app
+
+
+app = create_app()
