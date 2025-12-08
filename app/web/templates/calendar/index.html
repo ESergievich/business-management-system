@@ -1,0 +1,342 @@
+{% extends "base.html" %}
+{% block title %}Calendar - Business Management System{% endblock %}
+
+{% block content %}
+<div class="py-10" x-data="calendarData()">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold text-gray-900">Calendar</h1>
+            <div class="flex gap-2">
+                <button @click="loadToday()" class="px-4 py-2 bg-white border border-gray-300 rounded-md hover:bg-gray-50 text-sm">
+                    Today
+                </button>
+                <button @click="loadThisMonth()" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-500 text-sm">
+                    This Month
+                </button>
+            </div>
+        </div>
+
+        <!-- View Selector -->
+        <div class="bg-white shadow rounded-lg p-4 mb-6">
+            <div class="flex gap-2">
+                <button @click="view = 'day'; loadDay()"
+                        :class="view === 'day' ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'bg-gray-100'"
+                        class="px-4 py-2 rounded-md text-sm">
+                    Day View
+                </button>
+                <button @click="view = 'month'; loadMonth()"
+                        :class="view === 'month' ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'bg-gray-100'"
+                        class="px-4 py-2 rounded-md text-sm">
+                    Month View
+                </button>
+                <button @click="view = 'range'; showRangeModal = true"
+                        :class="view === 'range' ? 'bg-indigo-100 text-indigo-700 font-semibold' : 'bg-gray-100'"
+                        class="px-4 py-2 rounded-md text-sm">
+                    Custom Range
+                </button>
+            </div>
+
+            <!-- Date Navigator -->
+            <div class="flex items-center justify-between mt-4">
+                <button @click="navigatePrevious()" class="p-2 hover:bg-gray-100 rounded">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <h2 class="text-lg font-semibold" x-text="currentPeriodLabel"></h2>
+                <button @click="navigateNext()" class="p-2 hover:bg-gray-100 rounded">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Event Counters -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            <div class="bg-white shadow rounded-lg p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-blue-500 rounded-md p-3">
+                        <i class="fas fa-tasks text-white text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm text-gray-500">Tasks</p>
+                        <p class="text-2xl font-semibold" x-text="taskEvents.length"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white shadow rounded-lg p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-green-500 rounded-md p-3">
+                        <i class="fas fa-calendar-alt text-white text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm text-gray-500">Meetings</p>
+                        <p class="text-2xl font-semibold" x-text="meetingEvents.length"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white shadow rounded-lg p-4">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-purple-500 rounded-md p-3">
+                        <i class="fas fa-calendar-check text-white text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm text-gray-500">Total Events</p>
+                        <p class="text-2xl font-semibold" x-text="events.length"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Events List -->
+        <div class="bg-white shadow rounded-lg">
+            <div class="p-4 border-b">
+                <h3 class="font-semibold">
+                    Events
+                    <span class="text-sm text-gray-500 font-normal">
+                        (<span x-text="formatDate(currentPeriod.start)"></span> - <span x-text="formatDate(currentPeriod.end)"></span>)
+                    </span>
+                </h3>
+            </div>
+
+            <div class="divide-y max-h-[600px] overflow-y-auto">
+                <template x-for="event in sortedEvents" :key="event.type + '-' + event.id">
+                    <div class="p-4 hover:bg-gray-50 transition">
+                        <div class="flex items-start gap-4">
+                            <!-- Event Icon -->
+                            <div class="flex-shrink-0 mt-1">
+                                <div class="h-10 w-10 rounded-full flex items-center justify-center" :class="{
+                                    'bg-blue-100 text-blue-600': event.type === 'task',
+                                    'bg-green-100 text-green-600': event.type === 'meeting'
+                                }">
+                                    <i :class="event.type === 'task' ? 'fas fa-tasks' : 'fas fa-calendar-alt'"></i>
+                                </div>
+                            </div>
+
+                            <!-- Event Details -->
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <h4 class="font-semibold text-gray-900" x-text="event.title"></h4>
+                                    <span class="text-xs px-2 py-1 rounded-full" :class="{
+                                        'bg-yellow-100 text-yellow-800': event.type === 'task' && event.status === 'open',
+                                        'bg-blue-100 text-blue-800': event.type === 'task' && event.status === 'in_progress',
+                                        'bg-green-100 text-green-800': event.type === 'task' && event.status === 'completed',
+                                        'bg-green-100 text-green-800': event.type === 'meeting'
+                                    }">
+                                        <span x-show="event.type === 'task'" x-text="event.status?.replace('_', ' ').toUpperCase()"></span>
+                                        <span x-show="event.type === 'meeting'">MEETING</span>
+                                    </span>
+                                </div>
+
+                                <p class="text-sm text-gray-600 mb-2" x-text="event.description || 'No description'"></p>
+
+                                <div class="flex flex-wrap gap-4 text-xs text-gray-500">
+                                    <template x-if="event.type === 'task'">
+                                        <span>
+                                            <i class="far fa-calendar mr-1"></i>
+                                            Due: <span x-text="event.deadline ? formatDateTime(event.deadline) : 'No deadline'"></span>
+                                        </span>
+                                    </template>
+                                    <template x-if="event.type === 'meeting'">
+                                        <span>
+                                            <i class="far fa-clock mr-1"></i>
+                                            <span x-text="formatDateTime(event.start_time) + ' - ' + formatTime(event.end_time)"></span>
+                                        </span>
+                                    </template>
+                                    <template x-if="event.type === 'meeting'">
+                                        <span>
+                                            <i class="fas fa-users mr-1"></i>
+                                            <span x-text="event.participant_ids?.length + ' participants'"></span>
+                                        </span>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <!-- Actions -->
+                            <button @click="viewEventDetails(event)" class="text-indigo-600 hover:text-indigo-800">
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </template>
+
+                <template x-if="events.length === 0">
+                    <div class="p-12 text-center">
+                        <i class="fas fa-calendar-times text-6xl text-gray-300 mb-4"></i>
+                        <p class="text-gray-500">No events in this period</p>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Range Modal -->
+    <div x-show="showRangeModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50" style="display: none;">
+        <div @click.away="showRangeModal = false" class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 class="text-lg font-semibold mb-4">Select Date Range</h3>
+            <form @submit.prevent="loadCustomRange">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                        <input x-model="customRange.start" type="date" required
+                               class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+                        <input x-model="customRange.end" type="date" required
+                               class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    </div>
+                </div>
+                <div class="mt-6 flex justify-end gap-2">
+                    <button @click="showRangeModal = false" type="button" class="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-4 py-2 text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-500">
+                        Apply
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function calendarData() {
+    return {
+        events: [],
+        view: 'month',
+        currentDate: new Date(),
+        currentPeriod: { start: '', end: '' },
+        showRangeModal: false,
+        customRange: { start: '', end: '' },
+
+        get taskEvents() {
+            return this.events.filter(e => e.type === 'task');
+        },
+
+        get meetingEvents() {
+            return this.events.filter(e => e.type === 'meeting');
+        },
+
+        get sortedEvents() {
+            return [...this.events].sort((a, b) => {
+                const aTime = a.type === 'task' ? (a.deadline || a.created_at) : a.start_time;
+                const bTime = b.type === 'task' ? (b.deadline || b.created_at) : b.start_time;
+                return new Date(aTime) - new Date(bTime);
+            });
+        },
+
+        get currentPeriodLabel() {
+            if (this.view === 'day') {
+                return new Date(this.currentDate).toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            } else if (this.view === 'month') {
+                return new Date(this.currentDate).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long'
+                });
+            } else {
+                return `${this.formatDate(this.currentPeriod.start)} - ${this.formatDate(this.currentPeriod.end)}`;
+            }
+        },
+
+        async init() {
+            await this.loadThisMonth();
+        },
+
+        async loadEvents(params) {
+            try {
+                const data = await apiCall('/v1/calendar/events', {
+                    method: 'POST',
+                    body: JSON.stringify(params)
+                });
+                this.events = data.events;
+                this.currentPeriod = {
+                    start: data.start_period,
+                    end: data.end_period
+                };
+            } catch (error) {
+                showFlash('Failed to load events', 'error');
+            }
+        },
+
+        async loadToday() {
+            this.view = 'day';
+            this.currentDate = new Date();
+            await this.loadDay();
+        },
+
+        async loadThisMonth() {
+            this.view = 'month';
+            this.currentDate = new Date();
+            await this.loadMonth();
+        },
+
+        async loadDay() {
+            const date = new Date(this.currentDate).toISOString().split('T')[0];
+            await this.loadEvents({ day: date });
+        },
+
+        async loadMonth() {
+            const date = new Date(this.currentDate).toISOString().split('T')[0];
+            await this.loadEvents({ month: date });
+        },
+
+        async loadCustomRange() {
+            await this.loadEvents({
+                start: this.customRange.start,
+                end: this.customRange.end
+            });
+            this.showRangeModal = false;
+        },
+
+        navigatePrevious() {
+            if (this.view === 'day') {
+                this.currentDate.setDate(this.currentDate.getDate() - 1);
+                this.loadDay();
+            } else if (this.view === 'month') {
+                this.currentDate.setMonth(this.currentDate.getMonth() - 1);
+                this.loadMonth();
+            }
+        },
+
+        navigateNext() {
+            if (this.view === 'day') {
+                this.currentDate.setDate(this.currentDate.getDate() + 1);
+                this.loadDay();
+            } else if (this.view === 'month') {
+                this.currentDate.setMonth(this.currentDate.getMonth() + 1);
+                this.loadMonth();
+            }
+        },
+
+        viewEventDetails(event) {
+            if (event.type === 'task') {
+                window.location.href = '/tasks';
+            } else {
+                window.location.href = '/meetings';
+            }
+        },
+
+        formatDateTime(dateString) {
+            return new Date(dateString).toLocaleString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        },
+
+        formatTime(dateString) {
+            return new Date(dateString).toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Tasks{% endblock %}
+{% block content %}
+<div class="py-10" x-data="tasksData()">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold">Tasks</h1>
+            {% if user.role in ['admin', 'manager'] %}
+            <button @click="showCreateModal = true" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-500">
+                <i class="fas fa-plus mr-2"></i>New Task
+            </button>
+            {% endif %}
+        </div>
+        
+        <div class="bg-white shadow rounded-lg">
+            <div class="p-4 border-b">
+                <div class="flex gap-2">
+                    <button @click="filter = 'all'" :class="filter === 'all' ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100'" class="px-3 py-1 rounded-md text-sm">All</button>
+                    <button @click="filter = 'open'" :class="filter === 'open' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100'" class="px-3 py-1 rounded-md text-sm">Open</button>
+                    <button @click="filter = 'in_progress'" :class="filter === 'in_progress' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100'" class="px-3 py-1 rounded-md text-sm">In Progress</button>
+                    <button @click="filter = 'completed'" :class="filter === 'completed' ? 'bg-green-100 text-green-700' : 'bg-gray-100'" class="px-3 py-1 rounded-md text-sm">Completed</button>
+                </div>
+            </div>
+            
+            <div class="divide-y">
+                <template x-for="task in filteredTasks" :key="task.id">
+                    <div class="p-4 hover:bg-gray-50 cursor-pointer" @click="selectTask(task)">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="font-medium" x-text="task.title"></h3>
+                                <p class="text-sm text-gray-500 mt-1" x-text="task.description || 'No description'"></p>
+                                <p class="text-xs text-gray-400 mt-2">
+                                    Due: <span x-text="task.deadline ? new Date(task.deadline).toLocaleDateString() : 'No deadline'"></span>
+                                </p>
+                            </div>
+                            <span class="text-xs px-2 py-1 rounded-full" :class="{
+                                'bg-yellow-100 text-yellow-800': task.status === 'open',
+                                'bg-blue-100 text-blue-800': task.status === 'in_progress',
+                                'bg-green-100 text-green-800': task.status === 'completed'
+                            }" x-text="task.status.replace('_', ' ')"></span>
+                        </div>
+                    </div>
+                </template>
+                <template x-if="filteredTasks.length === 0">
+                    <div class="p-8 text-center text-gray-500">No tasks found</div>
+                </template>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function tasksData() {
+    return {
+        tasks: [],
+        filter: 'all',
+        showCreateModal: false,
+        
+        get filteredTasks() {
+            return this.filter === 'all' ? this.tasks : this.tasks.filter(t => t.status === this.filter);
+        },
+        
+        async init() {
+            await this.loadTasks();
+        },
+        
+        async loadTasks() {
+            try {
+                this.tasks = await apiCall('/v1/tasks/');
+            } catch (error) {
+                showFlash('Failed to load tasks', 'error');
+            }
+        },
+        
+        selectTask(task) {
+            // Show task details
+            alert(`Task: ${task.title}\nStatus: ${task.status}`);
+        }
+    }
+}
+</script>
+{% endblock %}

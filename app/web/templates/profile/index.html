@@ -1,0 +1,284 @@
+{% extends "base.html" %}
+{% block title %}Profile - Business Management System{% endblock %}
+
+{% block content %}
+<div class="py-10" x-data="profileData()">
+    <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-8">Profile Settings</h1>
+
+        <!-- Profile Overview -->
+        <div class="bg-white shadow rounded-lg p-6 mb-6">
+            <div class="flex items-center gap-6">
+                <div class="h-24 w-24 rounded-full bg-indigo-600 flex items-center justify-center text-white text-3xl font-bold">
+                    {{ user.username[0].upper() }}
+                </div>
+                <div class="flex-1">
+                    <h2 class="text-2xl font-semibold text-gray-900">{{ user.username }}</h2>
+                    <p class="text-gray-500">{{ user.email }}</p>
+                    <div class="flex items-center gap-2 mt-2">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800">
+                            <i class="fas fa-shield-alt mr-1"></i>
+                            {{ user.role.upper() }}
+                        </span>
+                        {% if user.is_verified %}
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                            <i class="fas fa-check-circle mr-1"></i>
+                            Verified
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            <div class="bg-white shadow rounded-lg p-4">
+                <div class="text-sm text-gray-500 mb-1">Teams</div>
+                <div class="text-2xl font-bold text-gray-900" x-text="stats.teams"></div>
+            </div>
+            <div class="bg-white shadow rounded-lg p-4">
+                <div class="text-sm text-gray-500 mb-1">Tasks Assigned</div>
+                <div class="text-2xl font-bold text-gray-900" x-text="stats.tasks"></div>
+            </div>
+            <div class="bg-white shadow rounded-lg p-4">
+                <div class="text-sm text-gray-500 mb-1">Average Rating</div>
+                <div class="text-2xl font-bold text-gray-900">
+                    <span x-text="stats.rating"></span>
+                    <i class="fas fa-star text-yellow-400 text-lg ml-1"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="bg-white shadow rounded-lg">
+            <div class="border-b border-gray-200">
+                <nav class="flex -mb-px">
+                    <button @click="activeTab = 'info'" 
+                            :class="activeTab === 'info' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                            class="py-4 px-6 border-b-2 font-medium text-sm">
+                        <i class="fas fa-user mr-2"></i>
+                        Personal Info
+                    </button>
+                    <button @click="activeTab = 'evaluations'" 
+                            :class="activeTab === 'evaluations' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                            class="py-4 px-6 border-b-2 font-medium text-sm">
+                        <i class="fas fa-star mr-2"></i>
+                        My Evaluations
+                    </button>
+                    <button @click="activeTab = 'activity'" 
+                            :class="activeTab === 'activity' ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                            class="py-4 px-6 border-b-2 font-medium text-sm">
+                        <i class="fas fa-chart-line mr-2"></i>
+                        Activity
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Personal Info Tab -->
+            <div x-show="activeTab === 'info'" class="p-6">
+                <h3 class="text-lg font-semibold mb-4">Update Profile</h3>
+                <form @submit.prevent="updateProfile" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                        <input x-model="profileForm.username" type="text"
+                               class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <input type="email" value="{{ user.email }}" disabled
+                               class="w-full rounded-md border-gray-300 bg-gray-50 text-gray-500">
+                        <p class="mt-1 text-xs text-gray-500">Email cannot be changed</p>
+                    </div>
+                    <div class="pt-4">
+                        <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-500">
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+
+                <div class="mt-8 pt-8 border-t">
+                    <h3 class="text-lg font-semibold mb-4">Account Information</h3>
+                    <dl class="space-y-3">
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Account Created</dt>
+                            <dd class="text-sm text-gray-900 mt-1" x-text="formatDate('{{ user.created_at }}')"></dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Role</dt>
+                            <dd class="text-sm text-gray-900 mt-1">{{ user.role.upper() }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Status</dt>
+                            <dd class="text-sm text-gray-900 mt-1">
+                                {% if user.is_active %}
+                                    <span class="text-green-600"><i class="fas fa-check-circle mr-1"></i>Active</span>
+                                {% else %}
+                                    <span class="text-red-600"><i class="fas fa-times-circle mr-1"></i>Inactive</span>
+                                {% endif %}
+                            </dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+
+            <!-- Evaluations Tab -->
+            <div x-show="activeTab === 'evaluations'" class="p-6">
+                <h3 class="text-lg font-semibold mb-4">My Evaluations</h3>
+                
+                <template x-if="evaluations.length === 0">
+                    <div class="text-center py-12">
+                        <i class="fas fa-star text-6xl text-gray-300 mb-4"></i>
+                        <p class="text-gray-500">No evaluations yet</p>
+                    </div>
+                </template>
+
+                <div class="space-y-4">
+                    <template x-for="evaluation in evaluations" :key="evaluation.task_id">
+                        <div class="border rounded-lg p-4">
+                            <div class="flex justify-between items-start mb-2">
+                                <h4 class="font-medium">Task #<span x-text="evaluation.task_id"></span></h4>
+                                <div class="flex">
+                                    <template x-for="i in 5" :key="i">
+                                        <i class="fas fa-star" :class="i <= evaluation.rating ? 'text-yellow-400' : 'text-gray-300'"></i>
+                                    </template>
+                                </div>
+                            </div>
+                            <p class="text-sm text-gray-500">
+                                Rating: <span x-text="evaluation.rating"></span> out of 5
+                            </p>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Activity Tab -->
+            <div x-show="activeTab === 'activity'" class="p-6">
+                <h3 class="text-lg font-semibold mb-4">Recent Activity</h3>
+                
+                <div class="space-y-4">
+                    <div class="flex items-start gap-3">
+                        <div class="flex-shrink-0 h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                            <i class="fas fa-tasks text-blue-600"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm font-medium text-gray-900">Tasks assigned: <span x-text="stats.tasks"></span></p>
+                            <p class="text-xs text-gray-500">Total tasks you're working on</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3">
+                        <div class="flex-shrink-0 h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
+                            <i class="fas fa-calendar-alt text-green-600"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm font-medium text-gray-900">Upcoming meetings: <span x-text="stats.meetings"></span></p>
+                            <p class="text-xs text-gray-500">Meetings scheduled for this week</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3">
+                        <div class="flex-shrink-0 h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center">
+                            <i class="fas fa-users text-purple-600"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-sm font-medium text-gray-900">Team memberships: <span x-text="stats.teams"></span></p>
+                            <p class="text-xs text-gray-500">Teams you're part of</p>
+                        </div>
+                    </div>
+
+                    <template x-if="stats.rating !== '-'">
+                        <div class="flex items-start gap-3">
+                            <div class="flex-shrink-0 h-10 w-10 rounded-full bg-yellow-100 flex items-center justify-center">
+                                <i class="fas fa-star text-yellow-600"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium text-gray-900">Performance rating: <span x-text="stats.rating"></span>/5</p>
+                                <p class="text-xs text-gray-500">Your average task evaluation score</p>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function profileData() {
+    return {
+        activeTab: 'info',
+        stats: {
+            teams: 0,
+            tasks: 0,
+            meetings: 0,
+            rating: '-'
+        },
+        evaluations: [],
+        profileForm: {
+            username: '{{ user.username }}'
+        },
+        
+        async init() {
+            await Promise.all([
+                this.loadStats(),
+                this.loadEvaluations()
+            ]);
+        },
+        
+        async loadStats() {
+            try {
+                const [user, tasks, meetings] = await Promise.all([
+                    apiCall('/v1/users/me'),
+                    apiCall('/v1/tasks/'),
+                    apiCall('/v1/meetings/')
+                ]);
+                
+                this.stats.teams = user.teams?.length || 0;
+                this.stats.tasks = tasks.filter(t => t.assignee_id === {{ user.id }}).length;
+                
+                // Meetings this week
+                const now = new Date();
+                const weekEnd = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+                this.stats.meetings = meetings.filter(m => {
+                    const start = new Date(m.start_time);
+                    return start >= now && start <= weekEnd;
+                }).length;
+                
+                // Average rating
+                const evaluations = await apiCall('/v1/tasks/evaluations/me');
+                if (evaluations.length > 0) {
+                    const sum = evaluations.reduce((acc, e) => acc + e.rating, 0);
+                    this.stats.rating = (sum / evaluations.length).toFixed(1);
+                }
+            } catch (error) {
+                console.error('Failed to load stats:', error);
+            }
+        },
+        
+        async loadEvaluations() {
+            try {
+                this.evaluations = await apiCall('/v1/tasks/evaluations/me');
+            } catch (error) {
+                console.error('Failed to load evaluations:', error);
+            }
+        },
+        
+        async updateProfile() {
+            try {
+                await apiCall('/v1/users/me', {
+                    method: 'PATCH',
+                    body: JSON.stringify(this.profileForm)
+                });
+                showFlash('Profile updated successfully!', 'success');
+                setTimeout(() => window.location.reload(), 1000);
+            } catch (error) {
+                showFlash(error.message, 'error');
+            }
+        }
+    }
+}
+</script>
+{% endblock %}

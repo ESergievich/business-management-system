@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome - Business Management System{% endblock %}
+
+{% block content %}
+<div class="bg-gradient-to-b from-indigo-50 to-white">
+    <!-- Hero Section -->
+    <div class="relative overflow-hidden">
+        <div class="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8">
+            <div class="mx-auto max-w-2xl text-center">
+                <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
+                    Business Management <span class="text-indigo-600">Simplified</span>
+                </h1>
+                <p class="mt-6 text-lg leading-8 text-gray-600">
+                    Manage your teams, tasks, meetings, and evaluations all in one place. 
+                    Boost productivity with our intuitive platform.
+                </p>
+                <div class="mt-10 flex items-center justify-center gap-x-6">
+                    <a href="/register" class="rounded-md bg-indigo-600 px-6 py-3 text-base font-semibold text-white shadow-sm hover:bg-indigo-500 transition">
+                        Get Started <i class="fas fa-arrow-right ml-2"></i>
+                    </a>
+                    <a href="/login" class="text-base font-semibold leading-7 text-gray-900">
+                        Sign in <i class="fas fa-arrow-right ml-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Decorative elements -->
+        <div class="absolute left-1/2 top-0 -z-10 -translate-x-1/2 blur-3xl" aria-hidden="true">
+            <div class="aspect-[1155/678] w-[72.1875rem] bg-gradient-to-tr from-indigo-200 to-purple-200 opacity-30"></div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="mx-auto max-w-7xl px-6 lg:px-8 pb-24">
+        <div class="mx-auto max-w-2xl lg:text-center mb-16">
+            <h2 class="text-base font-semibold leading-7 text-indigo-600">Everything You Need</h2>
+            <p class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+                All-in-one management solution
+            </p>
+        </div>
+        
+        <div class="mx-auto max-w-7xl">
+            <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                <!-- Feature 1 -->
+                <div class="relative bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-600 text-white mb-4">
+                        <i class="fas fa-users text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Team Management</h3>
+                    <p class="text-gray-600">
+                        Create and manage teams with invite codes. Control access and organize your workforce effectively.
+                    </p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="relative bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-600 text-white mb-4">
+                        <i class="fas fa-tasks text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Task Tracking</h3>
+                    <p class="text-gray-600">
+                        Assign tasks, set deadlines, track progress, and evaluate performance with our comprehensive system.
+                    </p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="relative bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-600 text-white mb-4">
+                        <i class="fas fa-calendar-alt text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Meeting Scheduler</h3>
+                    <p class="text-gray-600">
+                        Schedule meetings with automatic conflict detection and manage participants seamlessly.
+                    </p>
+                </div>
+
+                <!-- Feature 4 -->
+                <div class="relative bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-600 text-white mb-4">
+                        <i class="fas fa-star text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Performance Reviews</h3>
+                    <p class="text-gray-600">
+                        Evaluate completed tasks with 1-5 star ratings and track team member performance over time.
+                    </p>
+                </div>
+
+                <!-- Feature 5 -->
+                <div class="relative bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-600 text-white mb-4">
+                        <i class="fas fa-calendar text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Unified Calendar</h3>
+                    <p class="text-gray-600">
+                        View all tasks and meetings in one calendar. Filter by day, month, or custom date ranges.
+                    </p>
+                </div>
+
+                <!-- Feature 6 -->
+                <div class="relative bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-600 text-white mb-4">
+                        <i class="fas fa-shield-alt text-xl"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Role-Based Access</h3>
+                    <p class="text-gray-600">
+                        Three permission levels: User, Manager, and Admin. Each with appropriate access controls.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CTA Section -->
+    <div class="bg-indigo-600">
+        <div class="px-6 py-24 sm:px-6 sm:py-32 lg:px-8">
+            <div class="mx-auto max-w-2xl text-center">
+                <h2 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+                    Ready to boost your productivity?
+                </h2>
+                <p class="mx-auto mt-6 max-w-xl text-lg leading-8 text-indigo-100">
+                    Join thousands of teams already using our platform to streamline their workflow.
+                </p>
+                <div class="mt-10 flex items-center justify-center gap-x-6">
+                    <a href="/register" class="rounded-md bg-white px-6 py-3 text-base font-semibold text-indigo-600 shadow-sm hover:bg-indigo-50 transition">
+                        Start Free Trial
+                    </a>
+                    <a href="/api/docs" target="_blank" class="text-base font-semibold leading-7 text-white">
+                        View API Docs <i class="fas fa-external-link-alt ml-1 text-sm"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="py-10" x-data="dashboardData()">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <h1 class="text-3xl font-bold text-gray-900">Dashboard</h1>
+        
+        <div class="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="p-5">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 bg-indigo-500 rounded-md p-3">
+                            <i class="fas fa-tasks text-white text-xl"></i>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">My Tasks</dt>
+                                <dd class="text-2xl font-semibold text-gray-900" x-text="stats.tasks"></dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="p-5">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 bg-green-500 rounded-md p-3">
+                            <i class="fas fa-calendar text-white text-xl"></i>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">Meetings Today</dt>
+                                <dd class="text-2xl font-semibold text-gray-900" x-text="stats.meetings"></dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="p-5">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 bg-yellow-500 rounded-md p-3">
+                            <i class="fas fa-users text-white text-xl"></i>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">My Teams</dt>
+                                <dd class="text-2xl font-semibold text-gray-900" x-text="stats.teams"></dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-white overflow-hidden shadow rounded-lg">
+                <div class="p-5">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 bg-purple-500 rounded-md p-3">
+                            <i class="fas fa-star text-white text-xl"></i>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">Avg Rating</dt>
+                                <dd class="text-2xl font-semibold text-gray-900" x-text="stats.rating"></dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div class="bg-white shadow rounded-lg p-6">
+                <h2 class="text-lg font-semibold mb-4">Recent Tasks</h2>
+                <template x-if="tasks.length === 0">
+                    <p class="text-gray-500 text-center py-8">No tasks yet</p>
+                </template>
+                <div class="space-y-3">
+                    <template x-for="task in tasks" :key="task.id">
+                        <div class="border-l-4 pl-4 py-2" :class="{
+                            'border-yellow-400': task.status === 'open',
+                            'border-blue-400': task.status === 'in_progress',
+                            'border-green-400': task.status === 'completed'
+                        }">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h3 class="font-medium" x-text="task.title"></h3>
+                                    <p class="text-sm text-gray-500" x-text="'Due: ' + (task.deadline ? new Date(task.deadline).toLocaleDateString() : 'No deadline')"></p>
+                                </div>
+                                <span class="text-xs px-2 py-1 rounded-full" :class="{
+                                    'bg-yellow-100 text-yellow-800': task.status === 'open',
+                                    'bg-blue-100 text-blue-800': task.status === 'in_progress',
+                                    'bg-green-100 text-green-800': task.status === 'completed'
+                                }" x-text="task.status.replace('_', ' ')"></span>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <div class="bg-white shadow rounded-lg p-6">
+                <h2 class="text-lg font-semibold mb-4">Upcoming Meetings</h2>
+                <template x-if="meetings.length === 0">
+                    <p class="text-gray-500 text-center py-8">No upcoming meetings</p>
+                </template>
+                <div class="space-y-3">
+                    <template x-for="meeting in meetings" :key="meeting.id">
+                        <div class="border-l-4 border-indigo-400 pl-4 py-2">
+                            <h3 class="font-medium" x-text="meeting.title"></h3>
+                            <p class="text-sm text-gray-500" x-text="new Date(meeting.start_time).toLocaleString()"></p>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function dashboardData() {
+    return {
+        stats: { tasks: 0, meetings: 0, teams: 0, rating: '-' },
+        tasks: [],
+        meetings: [],
+        
+        async init() {
+            await this.loadStats();
+            await this.loadTasks();
+            await this.loadMeetings();
+        },
+        
+        async loadStats() {
+            try {
+                const [tasks, meetings] = await Promise.all([
+                    apiCall('/v1/tasks/'),
+                    apiCall('/v1/meetings/')
+                ]);
+                
+                const user = await apiCall('/v1/users/me');
+                this.stats.tasks = tasks.length;
+                this.stats.meetings = meetings.filter(m => 
+                    new Date(m.start_time).toDateString() === new Date().toDateString()
+                ).length;
+                this.stats.teams = user.teams?.length || 0;
+            } catch (error) {
+                console.error('Failed to load stats:', error);
+            }
+        },
+        
+        async loadTasks() {
+            try {
+                const data = await apiCall('/v1/tasks/');
+                this.tasks = data.slice(0, 5);
+            } catch (error) {
+                console.error('Failed to load tasks:', error);
+            }
+        },
+        
+        async loadMeetings() {
+            try {
+                const data = await apiCall('/v1/meetings/');
+                this.meetings = data.filter(m => new Date(m.start_time) > new Date()).slice(0, 5);
+            } catch (error) {
+                console.error('Failed to load meetings:', error);
+            }
+        }
+    }
+}
+</script>
+{% endblock %}
