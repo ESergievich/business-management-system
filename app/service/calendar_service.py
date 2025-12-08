@@ -1,5 +1,5 @@
 from calendar import monthrange
-from datetime import date, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 
 from sqlalchemy import and_, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -40,7 +40,7 @@ class CalendarService:
             - start_datetime: 00:00:00 of the specified day
             - end_datetime: 00:00:00 of the next day (exclusive)
         """
-        start = datetime.combine(date_data, datetime.min.time())
+        start = datetime.combine(date_data, datetime.min.time()).replace(tzinfo=UTC)
         end = start + timedelta(days=1)
         return start, end
 
@@ -57,7 +57,7 @@ class CalendarService:
             - start_datetime: 00:00:00 of the first day of the month
             - end_datetime: 00:00:00 of the first day of next month (exclusive)
         """
-        start = datetime(date_data.year, date_data.month, 1, 0, 0, 0)
+        start = datetime(date_data.year, date_data.month, 1, 0, 0, 0, tzinfo=UTC)
         days_count = monthrange(date_data.year, date_data.month)[1]
         end = start.replace(day=days_count) + timedelta(days=1)
         return start, end
@@ -166,9 +166,12 @@ class CalendarService:
         Returns:
             Datetime representing when the event occurs/is due
         """
-        if isinstance(event, Task):
-            return event.deadline or event.created_at
-        return event.start_time
+        dt = event.deadline or event.created_at if isinstance(event, Task) else event.start_time
+
+        if dt and dt.tzinfo is None:
+            dt = dt.replace(tzinfo=UTC)
+
+        return dt
 
     async def get_user_events_for_period(
         self,

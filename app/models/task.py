@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import Enum
 from typing import TYPE_CHECKING
 
-from sqlalchemy import DateTime, ForeignKey, String, Text
+from sqlalchemy import TIMESTAMP, ForeignKey, String, Text
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -29,7 +29,7 @@ class Task(Base):
         nullable=False,
         index=True,
     )
-    deadline: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    deadline: Mapped[datetime | None] = mapped_column(TIMESTAMP(timezone=True), nullable=True)
 
     team_id: Mapped[int] = mapped_column(ForeignKey("teams.id", ondelete="CASCADE"), nullable=False)
     team: Mapped["Team"] = relationship("Team", back_populates="tasks")
