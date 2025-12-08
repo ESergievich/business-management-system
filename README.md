@@ -60,6 +60,9 @@
 git clone git@github.com:ESergievich/business-management-system.git
 cd business-management-system
 
+# Создание файла блокировок
+uv lock
+
 # Создание .env файла
 cp .env.template .env
 
@@ -67,8 +70,15 @@ cp .env.template .env
 docker-compose up -d
 
 # Применение миграций (выполняется автоматически при старте)
-# API доступен на http://localhost:8000
+# Веб-интерфейс доступен по http://localhost:8000
+# Swagger UI для API доступен по http://localhost:8000/docs
 # Adminer (DB UI) на http://localhost:8080
+
+# Заполнение базы тестовыми данными (необязательно)
+# 1. Заходим в контейнер
+docker exec -it management_api bash
+# 2. Выполняем seed-скрипт
+python actions/seed.py
 ```
 
 
@@ -121,6 +131,27 @@ business-management-system/
 │   ├── service/                # Бизнес-логика
 │   │   ├── calendar_service.py
 │   │   └── meeting_service.py
+│   ├── web/
+│   │   ├── __init__.py
+│   │   ├── routes.py
+│   │   └── templates/
+│   │       ├── base.html
+│   │       ├── index.html
+│   │       ├── auth/
+│   │       │   ├── login.html
+│   │       │   └── register.html
+│   │       ├── dashboard/
+│   │       │   └── index.html
+│   │       ├── teams/
+│   │       │   └── index.html
+│   │       ├── tasks/
+│   │       │   └── index.html
+│   │       ├── meetings/
+│   │       │   └── index.html
+│   │       ├── calendar/
+│   │       │   └── index.html
+│   │       └── profile/
+│   │           └── index.html
 │   └── main.py                 # Точка входа приложения
 ├── migrations/                 # Alembic миграции
 ├── tests/                      # Тесты
