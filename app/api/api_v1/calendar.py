@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
@@ -79,8 +79,8 @@ async def get_calendar_events(
     elif period_type == "month":
         start, end = service.get_period_month(filter_data.month)  # type: ignore[arg-type]
     else:
-        start = datetime.combine(filter_data.start, datetime.min.time())  # type: ignore[arg-type]
-        end = datetime.combine(filter_data.end, datetime.min.time())  # type: ignore[arg-type]
+        start = datetime.combine(filter_data.start, datetime.min.time()).replace(tzinfo=UTC)  # type: ignore[arg-type]
+        end = datetime.combine(filter_data.end, datetime.min.time()).replace(tzinfo=UTC)  # type: ignore[arg-type]
 
     events = await service.get_user_events_for_period(
         user_id=current_user.id,
