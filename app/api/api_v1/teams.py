@@ -59,6 +59,28 @@ async def create_team(
     return new_team
 
 
+@router.get(
+    "",
+    response_model=list[TeamRead],
+    summary="Get all teams",
+    description="Admin can see all teams, managers and users see only their teams.",
+)
+async def get_teams(
+    current_user: Annotated[User, Depends(current_active_user)],
+    session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
+) -> list[Team]:
+    if current_user.role == UserRole.ADMIN:
+        result = await session.execute(
+            select(Team).options(selectinload(Team.members)),
+        )
+        return list(result.scalars().all())
+    result = await session.execute(
+        select(User).where(User.id == current_user.id).options(selectinload(User.teams).selectinload(Team.members)),
+    )
+    user = result.scalar_one()
+    return user.teams
+
+
 @router.post(
     "/join",
     response_model=TeamRead,
@@ -127,19 +149,25 @@ async def leave_team(
     "/{team_id}/members",
     response_model=TeamRead,
     summary="Get team members",
-    description="Allows an admin or manager to view the members of a team.",
+    description="Users can view members of teams they belong to. Admins can view any team.",
 )
 async def get_team_members(
     team_id: int,
-    _current_user: Annotated[User, Depends(role_required(UserRole.ADMIN, UserRole.MANAGER))],
+    current_user: Annotated[User, Depends(current_active_user)],
     session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
 ) -> Team:
-    result = await session.execute(select(Team).where(Team.id == team_id).options(selectinload(Team.members)))
+    result = await session.execute(
+        select(Team).where(Team.id == team_id).options(selectinload(Team.members)),
+    )
     team = result.scalar_one_or_none()
 
     if not team:
         msg = "Team"
         raise ObjectNotFoundError(msg)
+
+    if current_user.role != UserRole.ADMIN and current_user not in team.members:
+        msg = "You can only view teams you are a member of."
+        raise ForbiddenAccessError(msg)
 
     return team
 
